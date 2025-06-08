@@ -38,9 +38,11 @@ export default {
 
 // WebDAV 客户端工厂
 function webdavClient(url, username, password) {
+    // 确保 url 末尾没有斜杠
+    const baseUrl = url.replace(/\/+$/, '');
     return {
         async putFileContents(filename, buffer) {
-            const res = await fetch(`${url}/${filename}`, {
+            const res = await fetch(`${baseUrl}/${filename}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': 'Basic ' + btoa(`${username}:${password}`),
@@ -51,7 +53,7 @@ function webdavClient(url, username, password) {
             if (!res.ok) throw new Error('WebDAV 上传失败');
         },
         async getFileContents(filename) {
-            const res = await fetch(`${url}/${filename}`, {
+            const res = await fetch(`${baseUrl}/${filename}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': 'Basic ' + btoa(`${username}:${password}`)
@@ -66,8 +68,8 @@ function webdavClient(url, username, password) {
 // 上传处理
 async function handleUpload(request, webdav, currentUrl) {
     try {
-        const formData = await request.formData();
-        const file = formData.get('file');
+    const formData = await request.formData();
+    const file = formData.get('file');
         if (!file) return new Response('未选择文件', { status: 400 });
         if (!file.type.startsWith('image/')) return new Response('请上传图片文件', { status: 400 });
         const buffer = await file.arrayBuffer();
@@ -307,7 +309,7 @@ button:hover {
     #preview {
         grid-template-columns: 1fr;
     }
-}
+    }
 `
 };
 
